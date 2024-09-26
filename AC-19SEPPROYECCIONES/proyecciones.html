@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecciones 3D</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .cube-container {
+            width: 200px;
+            height: 200px;
+            perspective: 800px;
+            margin: 0 auto 20px;
+        }
+
+        .cube {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            transform-style: preserve-3d;
+            transition: transform 1s;
+        }
+
+        .cube div {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.1);
+            border: 2px solid black;
+        }
+
+        /* Caras del cubo */
+        .front  { transform: translateZ(50px); }
+        .back   { transform: rotateY(180deg) translateZ(50px); }
+        .right  { transform: rotateY(90deg) translateZ(50px); }
+        .left   { transform: rotateY(-90deg) translateZ(50px); }
+        .top    { transform: rotateX(90deg) translateZ(50px); }
+        .bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .labels {
+            margin-top: 10px;
+        }
+
+        #label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="cube-container">
+            <div class="cube" id="cube">
+                <div class="front"></div>
+                <div class="back"></div>
+                <div class="right"></div>
+                <div class="left"></div>
+                <div class="top"></div>
+                <div class="bottom"></div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="toggleProjection">Cambiar Proyección</button>
+        </div>
+        <div class="labels">
+            <span id="label">Perspectiva</span>
+        </div>
+    </div>
+
+    <script>
+        // Función pura que devuelve la siguiente proyección
+        function getNextProjection(projections, currentProjection) {
+            const nextIndex = (currentProjection + 1) % projections.length;
+            return { projection: projections[nextIndex], index: nextIndex };
+        }
+
+        // Función para dibujar en perspectiva
+        function dibujarPerspectiva(cube) {
+            cube.style.transform = 'rotateX(20deg) rotateY(20deg)';
+        }
+
+        // Función para dibujar ortográfica (ajustada para parecer más de lado)
+        function dibujarOrtografica(cube) {
+            cube.style.transform = 'rotateX(10deg) rotateY(30deg) translateZ(30px) scale(1)';
+        }
+
+        // Función para dibujar en isométrica
+        function dibujarIsometrica(cube) {
+            cube.style.transform = 'rotateX(45deg) rotateY(45deg)';
+        }
+
+        // Proyecciones definidas con los métodos correspondientes
+        const projections = [
+            { name: 'Perspectiva', method: dibujarPerspectiva },
+            { name: 'Ortográfica', method: dibujarOrtografica },
+            { name: 'Isométrica', method: dibujarIsometrica }
+        ];
+
+        // Estado inicial
+        let currentProjection = 0;
+
+        // Elementos del DOM
+        const cube = document.getElementById('cube');
+        const label = document.getElementById('label');
+        const button = document.getElementById('toggleProjection');
+
+        // Dibujar la proyección inicial
+        projections[currentProjection].method(cube);
+
+        // Evento para cambiar la proyección
+        button.addEventListener('click', () => {
+            const { projection, index } = getNextProjection(projections, currentProjection);
+            currentProjection = index;
+            projection.method(cube);
+            label.textContent = projection.name;
+        });
+    </script>
+</body>
+</html>
+
