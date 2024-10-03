@@ -11,9 +11,10 @@
 </head>
 <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="OrbitControls.js"></script> 
     <script>
         // Variables globales
-        let escena, camara, renderizador;
+        let escena, camara, renderizador, controles;
         let cubos = [];
 
         // Función para inicializar la escena
@@ -22,12 +23,18 @@
             escena = new THREE.Scene();
             // Crear cámara
             camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camara.position.z = 5;
+            camara.position.set(0, 2, 10); // Ajustar la posición para visualizar los cubos
 
             // Crear renderizador
             renderizador = new THREE.WebGLRenderer();
             renderizador.setSize(window.innerWidth, window.innerHeight);
             document.body.appendChild(renderizador.domElement);
+
+            // Crear controles de órbita
+            controles = new THREE.OrbitControls(camara, renderizador.domElement);
+            controles.enableDamping = true; // Habilitar amortiguación
+            controles.dampingFactor = 0.25; // Factor de amortiguación
+            controles.screenSpacePanning = false; // Desactivar el desplazamiento en el espacio de pantalla
 
             // Generar cubos
             generarCubos();
@@ -40,7 +47,6 @@
         function generarCubos() {
             const cantidadCubos = Math.floor(Math.random() * 5) + 1; // Entre 1 y 5 cubos
             const distanciaEntreCubos = 2; // Distancia entre cubos
-            const limiteX = 5; // Limite en X
 
             for (let i = 0; i < cantidadCubos; i++) {
                 // Crear geometría y material
@@ -51,7 +57,7 @@
                 // Crear mesh (cubo)
                 const cubo = new THREE.Mesh(geometria, material);
                 
-                // Posicionar cubo dentro de los límites
+                // Posicionar cubo en la escena
                 cubo.position.x = (i * distanciaEntreCubos) - (cantidadCubos * distanciaEntreCubos / 2);
                 cubo.position.y = 0;
                 cubo.position.z = 0;
@@ -72,6 +78,9 @@
                 cubo.rotation.y += 0.01;
             });
 
+            // Actualizar controles
+            controles.update();
+
             // Renderizar la escena
             renderizador.render(escena, camara);
         }
@@ -88,4 +97,3 @@
     </script>
 </body>
 </html>
-
