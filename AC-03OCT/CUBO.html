@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escena 3D con Three.js</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Variables globales
+        let escena, camara, renderizador;
+        let cubos = [];
+
+        // Función para inicializar la escena
+        function init() {
+            // Crear escena
+            escena = new THREE.Scene();
+            // Crear cámara
+            camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camara.position.z = 5;
+
+            // Crear renderizador
+            renderizador = new THREE.WebGLRenderer();
+            renderizador.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderizador.domElement);
+
+            // Generar cubos
+            generarCubos();
+
+            // Iniciar el bucle de animación
+            animar();
+        }
+
+        // Función para generar cubos
+        function generarCubos() {
+            const cantidadCubos = Math.floor(Math.random() * 5) + 1; // Entre 1 y 5 cubos
+            const distanciaEntreCubos = 2; // Distancia entre cubos
+            const limiteX = 5; // Limite en X
+
+            for (let i = 0; i < cantidadCubos; i++) {
+                // Crear geometría y material
+                const geometria = new THREE.BoxGeometry(1, 1, 1);
+                const colorAleatorio = Math.random() * 0xffffff; // Color aleatorio
+                const material = new THREE.MeshBasicMaterial({ color: colorAleatorio, wireframe: true }); // Malla
+
+                // Crear mesh (cubo)
+                const cubo = new THREE.Mesh(geometria, material);
+                
+                // Posicionar cubo dentro de los límites
+                cubo.position.x = (i * distanciaEntreCubos) - (cantidadCubos * distanciaEntreCubos / 2);
+                cubo.position.y = 0;
+                cubo.position.z = 0;
+
+                // Añadir cubo a la escena
+                escena.add(cubo);
+                cubos.push(cubo);
+            }
+        }
+
+        // Función para animar los cubos
+        function animar() {
+            requestAnimationFrame(animar);
+
+            // Rotar cada cubo
+            cubos.forEach(cubo => {
+                cubo.rotation.x += 0.01;
+                cubo.rotation.y += 0.01;
+            });
+
+            // Renderizar la escena
+            renderizador.render(escena, camara);
+        }
+
+        // Inicializar la escena al cargar
+        window.onload = init;
+
+        // Ajustar tamaño del renderizador al cambiar el tamaño de la ventana
+        window.addEventListener('resize', () => {
+            camara.aspect = window.innerWidth / window.innerHeight;
+            camara.updateProjectionMatrix();
+            renderizador.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
+
