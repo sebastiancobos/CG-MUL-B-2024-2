@@ -1,99 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escena 3D con Three.js</title>
-    <style>
-        body { margin: 0; }
-        canvas { display: block; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ejemplo Three.js - Cubos Aleatorios Alineados</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+  </style>
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="OrbitControls.js"></script> 
-    <script>
-        // Variables globales
-        let escena, camara, renderizador, controles;
-        let cubos = [];
+  <!-- Incluimos la librería de Three.js desde su CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  
+  <script>
+    // Crear la escena
+    const escena = new THREE.Scene();
+    escena.background = new THREE.Color(0x000000); // Fondo negro
 
-        // Función para inicializar la escena
-        function init() {
-            // Crear escena
-            escena = new THREE.Scene();
-            // Crear cámara
-            camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camara.position.set(0, 2, 10); // Ajustar la posición para visualizar los cubos
+    // Crear la cámara
+    const camara = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camara.position.z = 10; // Alejamos un poco más la cámara para mayor visibilidad
 
-            // Crear renderizador
-            renderizador = new THREE.WebGLRenderer();
-            renderizador.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderizador.domElement);
+    // Crear el renderizador
+    const renderizador = new THREE.WebGLRenderer();
+    renderizador.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderizador.domElement);
 
-            // Crear controles de órbita
-            controles = new THREE.OrbitControls(camara, renderizador.domElement);
-            controles.enableDamping = true; // Habilitar amortiguación
-            controles.dampingFactor = 0.25; // Factor de amortiguación
-            controles.screenSpacePanning = false; // Desactivar el desplazamiento en el espacio de pantalla
+    // Añadir luz ambiental
+    const luzAmbiental = new THREE.AmbientLight(0xffffff, 0.5); 
+    escena.add(luzAmbiental);
 
-            // Generar cubos
-            generarCubos();
+    // Añadir luz direccional
+    const luzDireccional = new THREE.DirectionalLight(0xffffff, 1);
+    luzDireccional.position.set(1, 1, 1).normalize();
+    escena.add(luzDireccional);
 
-            // Iniciar el bucle de animación
-            animar();
-        }
+    const cubes = []; // Array para almacenar los cubos
 
-        // Función para generar cubos
-        function generarCubos() {
-            const cantidadCubos = Math.floor(Math.random() * 5) + 1; // Entre 1 y 5 cubos
-            const distanciaEntreCubos = 2; // Distancia entre cubos
+    // Función para crear un cubo
+    function crearCubo() {
+      const geometriaCubo = new THREE.BoxGeometry(1, 1, 1);
+      const colorAleatorio = Math.random() * 0xffffff; // Color aleatorio
+      const materialCubo = new THREE.MeshBasicMaterial({
+        color: colorAleatorio, // Color aleatorio
+        wireframe: true
+      });
 
-            for (let i = 0; i < cantidadCubos; i++) {
-                // Crear geometría y material
-                const geometria = new THREE.BoxGeometry(1, 1, 1);
-                const colorAleatorio = Math.random() * 0xffffff; // Color aleatorio
-                const material = new THREE.MeshBasicMaterial({ color: colorAleatorio, wireframe: true }); // Malla
+      const cubo = new THREE.Mesh(geometriaCubo, materialCubo);
+      return cubo;
+    }
 
-                // Crear mesh (cubo)
-                const cubo = new THREE.Mesh(geometria, material);
-                
-                // Posicionar cubo en la escena
-                cubo.position.x = (i * distanciaEntreCubos) - (cantidadCubos * distanciaEntreCubos / 2);
-                cubo.position.y = 0;
-                cubo.position.z = 0;
+    // Crear y alinear entre 1 y 5 cubos
+    const numeroObjetos = Math.floor(Math.random() * 5) + 1; // Número aleatorio entre 1 y 5
+    for (let i = 0; i < numeroObjetos; i++) {
+      const cubo = crearCubo();
+      cubo.position.x = i * 2; // Alinear los cubos en el eje X
+      escena.add(cubo);
+      cubes.push(cubo); // Agregar el cubo al array
+    }
 
-                // Añadir cubo a la escena
-                escena.add(cubo);
-                cubos.push(cubo);
-            }
-        }
+    // Añadir controles de órbita
+    const controles = new THREE.OrbitControls(camara, renderizador.domElement);
 
-        // Función para animar los cubos
-        function animar() {
-            requestAnimationFrame(animar);
+    // Función de animación
+    function animar() {
+      requestAnimationFrame(animar);
 
-            // Rotar cada cubo
-            cubos.forEach(cubo => {
-                cubo.rotation.x += 0.01;
-                cubo.rotation.y += 0.01;
-            });
+      // Rotar cada cubo
+      cubes.forEach(cube => {
+        cube.rotation.x += 0.01; // Rota alrededor del eje X
+        cube.rotation.y += 0.01; // Rota alrededor del eje Y
+      });
 
-            // Actualizar controles
-            controles.update();
+      controles.update(); // Actualizar los controles en cada frame
+      renderizador.render(escena, camara); // Renderizar la escena
+    }
 
-            // Renderizar la escena
-            renderizador.render(escena, camara);
-        }
+    // Iniciar la animación
+    animar();
 
-        // Inicializar la escena al cargar
-        window.onload = init;
-
-        // Ajustar tamaño del renderizador al cambiar el tamaño de la ventana
-        window.addEventListener('resize', () => {
-            camara.aspect = window.innerWidth / window.innerHeight;
-            camara.updateProjectionMatrix();
-            renderizador.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+    // Ajustar el renderizado si se cambia el tamaño de la ventana
+    window.addEventListener('resize', () => {
+      camara.aspect = window.innerWidth / window.innerHeight;
+      camara.updateProjectionMatrix();
+      renderizador.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
